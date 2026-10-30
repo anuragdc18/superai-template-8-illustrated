@@ -5,6 +5,7 @@ import { ChevronDown, Clock, Mail, Menu, Minus, Phone, Plus, X, ArrowRight, Layo
 import { CATEGORIES, serviceUrl, waLink } from "../lib/site";
 import { telHref, useSite } from "../queries/site";
 import { authClient } from "../lib/auth";
+import { useExtraLinks } from "./content-ui";
 
 export function Logo({ light = false }: { light?: boolean }) {
   const site = useSite();
@@ -41,6 +42,7 @@ function WaIcon({ className = "h-4 w-4" }: { className?: string }) {
 export { WaIcon };
 
 export function Header() {
+  const extra = useExtraLinks();
   const [open, setOpen] = useState(false);
   const [acc, setAcc] = useState<string | null>("registration");
   const [scrolled, setScrolled] = useState(false);
@@ -100,10 +102,10 @@ export function Header() {
         <div className="container-x flex h-[72px] items-center gap-4">
           <Logo />
 
-          <nav className="ml-auto hidden items-center gap-0.5 min-[1150px]:flex xl:gap-1">
+          <nav className="ml-auto hidden items-center gap-0.5 min-[1150px]:flex">
             <Link
               to="/"
-              className={`rounded-full px-2.5 py-2 text-[14px] font-extrabold xl:px-3 xl:text-[15px] ${loc === "/" ? "bg-peach text-brand" : "text-navy hover:text-brand"}`}
+              className={`rounded-full px-2.5 py-2 text-[14px] font-extrabold ${loc === "/" ? "bg-peach text-brand" : "text-navy hover:text-brand"}`}
             >
               Home
             </Link>
@@ -111,7 +113,7 @@ export function Header() {
               <div key={c.slug} className="group relative">
                 <Link
                   to={`/services/${c.slug}`}
-                  className={`flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-2 text-[14px] font-extrabold transition xl:px-3 xl:text-[15px] ${
+                  className={`flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-2 text-[14px] font-extrabold transition ${
                     loc === `/services/${c.slug}` ? "bg-peach text-brand" : "text-navy group-hover:text-brand"
                   }`}
                 >
@@ -141,6 +143,24 @@ export function Header() {
                 </div>
               </div>
             ))}
+            {extra.length > 0 && (
+              <div className="group relative">
+                <button type="button" className={`flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-2 text-[14px] font-extrabold transition ${extra.some((x) => loc.startsWith(x.to)) ? "bg-peach text-brand" : "text-navy group-hover:text-brand"}`}>
+                  More
+                  <ChevronDown className="h-4 w-4 transition group-hover:rotate-180" />
+                </button>
+                <div className="invisible absolute right-0 top-full w-[220px] translate-y-2 pt-3 opacity-0 transition duration-200 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                  <div className="rounded-[24px] border border-line bg-white p-2 shadow-[0_24px_50px_-20px_rgba(27,43,94,0.35)]">
+                    {[...extra, { to: "/contact", label: "Contact Us" }].map((x) => (
+                      <Link key={x.to} to={x.to} className="flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-[14px] font-semibold text-navy hover:bg-surface hover:text-brand">
+                        <span className="h-2 w-2 rounded-full bg-sun" />
+                        {x.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </nav>
           <a href={telHref(site.phone)} className="btn-brand ml-2 !hidden whitespace-nowrap !px-5 !py-2.5 !text-[14.5px] xl:!inline-flex">
             <Phone className="h-4 w-4" /> Free Call
@@ -216,6 +236,11 @@ export function Header() {
                 </div>
               );
             })}
+            {[...extra, { to: "/contact", label: "Contact Us" }].map((x) => (
+              <Link key={x.to} to={x.to} className="block border-b border-line py-3.5 font-extrabold text-navy">
+                {x.label}
+              </Link>
+            ))}
             {session && (
               <Link to="/admin/dashboard" className="block py-3.5 font-semibold text-royal">
                 Owner Dashboard

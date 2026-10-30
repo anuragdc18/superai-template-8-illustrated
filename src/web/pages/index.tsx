@@ -30,6 +30,8 @@ import { asset } from "../lib/demo";
 import { useSite } from "../queries/site";
 import { LeadForm } from "../components/lead-form";
 import { WaIcon } from "../components/header";
+import { useContent } from "../queries/content";
+import { PostCard } from "../components/content-ui";
 import { Cloud, HandNote, SectionTitle, Sparkle, Squiggle, Sun, Wave } from "../components/doodles";
 
 /* ───────────────────────── helpers ───────────────────────── */
@@ -56,7 +58,7 @@ const HERO: HeroSlide[] = [
     text: GEN_TEXT,
     link: "/contact",
     linkText: "Talk to an Expert",
-    image: asset("/images/hero-all.jpg"),
+    image: "/images/hero-all.jpg",
     note: ["Start.", "Grow.", "Succeed!"],
   },
   ...[
@@ -66,7 +68,7 @@ const HERO: HeroSlide[] = [
     { link: "/services/microsoft-certifications", image: "hero-microsoft.jpg", note: ["Learn.", "Practice.", "Get certified!"] },
   ].map((x) => {
     const s = slideBy(x.link);
-    return { tag: s.tag, title: s.title, text: s.text, link: s.link, linkText: s.linkText, image: asset(`/images/${x.image}`), note: x.note };
+    return { tag: s.tag, title: s.title, text: s.text, link: s.link, linkText: s.linkText, image: `/images/${x.image}`, note: x.note };
   }),
 ];
 
@@ -140,7 +142,7 @@ function Hero() {
             {HERO.map((s, idx) => (
               <img
                 key={s.image}
-                src={s.image}
+                src={asset(s.image)}
                 alt=""
                 aria-hidden={idx !== i}
                 className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${idx === i ? "opacity-100" : "opacity-0"}`}
@@ -180,7 +182,7 @@ function GoogleG() {
   );
 }
 
-const STATS = [
+const BASE_STATS = [
   { icon: Star, big: "4.8", small: "Google Rating", tone: "bg-sun/30 text-[#c98a00]", google: true },
   { icon: Users, big: "1,000+", small: "Happy Clients", tone: "bg-peach text-brand" },
   { icon: MapPin, big: "Pan-India", small: "Service", tone: "bg-mint text-leaf" },
@@ -188,6 +190,8 @@ const STATS = [
 ];
 
 function EnquiryAndStats() {
+  const rating = useContent().reviewsSection.rating;
+  const STATS = BASE_STATS.map((s) => (s.google ? { ...s, big: rating } : s)).filter((s) => s.big);
   return (
     <section id="enquiry" className="relative z-10 scroll-mt-28 bg-white pb-14">
       <div className="container-x -mt-10 sm:-mt-12">
@@ -503,13 +507,12 @@ const WHY = [
   { icon: Headphones, title: "Real experts", text: "CA, CS and design experts guide you at every step." },
 ];
 
-const REVIEWS = [
-  { name: "Ravi K.", city: "Hyderabad", text: "My GST and company registration were done in a week. Very smooth, and they explained everything simply.", tone: "bg-brand" },
-  { name: "Priya S.", city: "Bengaluru", text: "They designed our logo and website together. Looks very professional and customers notice it.", tone: "bg-royal" },
-  { name: "Arjun M.", city: "Pune", text: "Our Instagram enquiries doubled in 2 months. The team posts on time every week.", tone: "bg-leaf" },
-];
+const TONES = ["bg-brand", "bg-royal", "bg-leaf"];
 
 function Reviews() {
+  const content = useContent();
+  const rs = content.reviewsSection;
+  const REVIEWS = rs.show ? content.reviews.slice(0, 3) : [];
   return (
     <section className="bg-white py-20">
       <div className="container-x">
@@ -527,33 +530,37 @@ function Reviews() {
             </div>
           ))}
         </div>
-        <div className="grid gap-6 lg:grid-cols-[260px_1fr] lg:items-start">
-          <div className="flex flex-col items-center rounded-[30px] bg-navy p-7 text-center text-white">
+        {REVIEWS.length > 0 && (
+        <div className={`grid gap-6 lg:items-start ${rs.rating ? "lg:grid-cols-[260px_1fr]" : ""}`}>
+          {rs.rating && (
+          <a href={rs.googleUrl || undefined} target="_blank" rel="noreferrer" className="flex flex-col items-center rounded-[30px] bg-navy p-7 text-center text-white">
             <GoogleG />
-            <p className="mt-3 text-[54px] font-black leading-none !text-white">4.8</p>
+            <p className="mt-3 text-[54px] font-black leading-none !text-white">{rs.rating}</p>
             <div className="mt-2 flex text-sun">{[0, 1, 2, 3, 4].map((k) => <Star key={k} className="h-5 w-5 fill-current" />)}</div>
             <p className="mt-2 text-[14px] text-white/80">Average rating on Google from 1,000+ happy clients</p>
             <HandNote lines={["Thank you!"]} className="mt-3 !text-[26px] text-sun" />
-          </div>
+          </a>
+          )}
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {REVIEWS.map((r) => (
-              <figure key={r.name} className="flex flex-col">
+            {REVIEWS.map((r, k) => (
+              <figure key={r.id} className="flex flex-col">
                 <blockquote className="relative flex-1 rounded-[26px] bg-cream p-6 text-[15.5px] font-semibold leading-relaxed text-navy ring-1 ring-line">
-                  <div className="mb-2 flex text-brand">{[0, 1, 2, 3, 4].map((k) => <Star key={k} className="h-4 w-4 fill-current" />)}</div>
+                  <div className="mb-2 flex text-brand">{Array.from({ length: r.rating }, (_, s) => <Star key={s} className="h-4 w-4 fill-current" />)}</div>
                   "{r.text}"
                   <span className="absolute -bottom-[9px] left-9 h-4 w-4 rotate-45 border-b border-r border-line bg-cream" />
                 </blockquote>
                 <figcaption className="mt-5 flex items-center gap-3 pl-4">
-                  <span className={`grid h-11 w-11 place-items-center rounded-full ${r.tone} text-[16px] font-black text-white`}>{r.name[0]}</span>
+                  <span className={`grid h-11 w-11 place-items-center rounded-full ${TONES[k % 3]} text-[16px] font-black text-white`}>{r.name[0]}</span>
                   <span className="leading-tight">
                     <span className="block font-black text-navy">{r.name}</span>
-                    <span className="text-[13px]">{r.city}</span>
+                    <span className="text-[13px]">{r.place}</span>
                   </span>
                 </figcaption>
               </figure>
             ))}
           </div>
         </div>
+        )}
       </div>
     </section>
   );
@@ -561,16 +568,11 @@ function Reviews() {
 
 /* ───────────────────────── 9. FAQ ───────────────────────── */
 
-const FAQS = [
-  { q: "Do I need to visit your office?", a: "No. Everything is done online. You can share documents on WhatsApp or email." },
-  { q: "How long does GST registration take?", a: "Usually 3 to 7 working days, once we have all your documents." },
-  { q: "Can you do registration and the website together?", a: "Yes. Many clients start with registration and logo, then add a website. We offer combo prices." },
-  { q: "How do I pay?", a: "You can pay by UPI, debit/credit card or bank transfer. You get a proper GST invoice." },
-  { q: "I'm not sure which registration I need. Can you help?", a: "Yes — that's what the free consultation is for. Our expert will suggest the right option for you." },
-];
 
 function Faq() {
   const [open, setOpen] = useState<number | null>(0);
+  const FAQS = useContent().faqs;
+  if (!FAQS.length) return null;
   return (
     <section className="relative bg-surface py-20">
       <Wave className="absolute -top-px left-0 h-10 w-full rotate-180" fill="#ffffff" />
@@ -593,7 +595,7 @@ function Faq() {
             {FAQS.map((f, idx) => {
               const isOpen = open === idx;
               return (
-                <div key={f.q} className={`rounded-[22px] bg-white ring-1 transition ${isOpen ? "ring-brand/40 shadow-[0_18px_36px_-26px_rgba(27,43,94,0.45)]" : "ring-line"}`}>
+                <div key={f.id} className={`rounded-[22px] bg-white ring-1 transition ${isOpen ? "ring-brand/40 shadow-[0_18px_36px_-26px_rgba(27,43,94,0.45)]" : "ring-line"}`}>
                   <button
                     onClick={() => setOpen(isOpen ? null : idx)}
                     className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-[16px] font-black text-navy"
@@ -613,6 +615,30 @@ function Faq() {
               );
             })}
           </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ───────────────────────── latest blog posts ───────────────────────── */
+
+function LatestPosts() {
+  const content = useContent();
+  if (!content.blog.show || !content.posts.length) return null;
+  return (
+    <section className="bg-white pb-20">
+      <div className="container-x">
+        <SectionTitle label={content.blog.title || "Blog"} title="Tips & guides" />
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {content.posts.slice(0, 3).map((p) => (
+            <PostCard key={p.id} p={p} />
+          ))}
+        </div>
+        <div className="mt-8 text-center">
+          <Link to="/blog" className="btn-brand">
+            See all articles <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </div>
     </section>
@@ -660,6 +686,7 @@ export default function Index() {
       <PopularPills />
       <ComicSteps />
       <Reviews />
+      <LatestPosts />
       <Faq />
       <CtaBand />
     </>
