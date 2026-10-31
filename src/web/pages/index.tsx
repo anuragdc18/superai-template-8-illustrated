@@ -234,7 +234,7 @@ const GOALS = [
     text: "Get your business registered the right way.",
     tone: "bg-peach",
     iconTone: "bg-brand text-white",
-    services: ["GST Registration", "Company Registration (Pvt Ltd)", "MSME / Udyam", "Trademark"],
+    services: ["GST Registration", "Private Limited Registration", "Udyam / MSME Registration", "Trademark Registration"],
   },
   {
     icon: Smartphone,
@@ -242,7 +242,7 @@ const GOALS = [
     text: "Be found on Google, Instagram and WhatsApp.",
     tone: "bg-mint",
     iconTone: "bg-leaf text-white",
-    services: ["Business Website", "Instagram & Facebook Handling", "Google Ranking (SEO)", "WhatsApp Auto-Reply"],
+    services: ["WordPress Website Development", "Social Media Management", "SEO Friendly", "WhatsApp AI Reply Setup"],
   },
   {
     icon: Palette,
@@ -250,7 +250,7 @@ const GOALS = [
     text: "Look professional from day one.",
     tone: "bg-[#fff1c9]",
     iconTone: "bg-sun text-navy",
-    services: ["Logo Design", "Business Card", "Brochure", "Full Brand Kit"],
+    services: ["Logo Design", "Business Card", "Brochure Design", "Brand Guidelines"],
   },
   {
     icon: GraduationCap,
